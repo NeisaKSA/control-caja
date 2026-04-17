@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QLabel, QLineEdit, QTableWidget,
     QTableWidgetItem, QHeaderView, QAbstractItemView,
-    QStyledItemDelegate, QStyle, QGridLayout
+    QStyledItemDelegate, QStyle, QGridLayout, QComboBox
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter
@@ -23,26 +23,8 @@ class VentanaControlCaja(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
 
-        layout_principal = QHBoxLayout()
+        layout_principal = QVBoxLayout()
         central.setLayout(layout_principal)
-
-        # =====================
-        # SIDEBAR
-        # =====================
-        sidebar = QWidget()
-        sidebar_layout = QVBoxLayout()
-
-        self.btn_volver = QPushButton("Volver")
-        sidebar_layout.addWidget(self.btn_volver)
-        self.btn_volver.clicked.connect(self.close)
-
-        sidebar_layout.addWidget(QPushButton("Resumen"))
-        sidebar_layout.addWidget(QPushButton("Movimientos"))
-        sidebar_layout.addWidget(QPushButton("Reportes"))
-        sidebar_layout.addStretch()
-
-        sidebar.setLayout(sidebar_layout)
-        sidebar.setFixedWidth(200)
 
         # =====================
         # CONTENIDO DERECHO
@@ -50,6 +32,28 @@ class VentanaControlCaja(QMainWindow):
         contenido = QWidget()
         contenido_layout = QVBoxLayout()
         contenido.setLayout(contenido_layout)
+        
+        # =====================
+        # HEADER ARRIBA
+        # =====================
+        
+        header = QHBoxLayout()
+        
+        self.btn_volver = QPushButton("Volver")
+        self.btn_volver.setFixedWidth(80)
+        self.btn_volver.clicked.connect(self.close)
+        
+        # Palanca de estado
+        self.combo_estado = QComboBox()
+        self.combo_estado.addItems(["ACTIVO", "FINALIZADO"])
+        self.combo_estado.currentTextChanged.connect(self.cambiar_estado)
+        self.combo_estado.setCurrentText("ACTIVO")
+        
+        header.addWidget(self.btn_volver)
+        header.addWidget(self.combo_estado)
+        header.addStretch()
+        
+        contenido_layout.addLayout(header)
 
         # =====================
         # TITULO
@@ -204,7 +208,6 @@ class VentanaControlCaja(QMainWindow):
         for i in range(5):
             self.tabla_totales.setColumnWidth(i, self.tabla.columnWidth(i))
 
-        layout_principal.addWidget(sidebar)
         layout_principal.addWidget(contenido)
 
     def verificar_nueva_fila(self, item):
@@ -281,6 +284,8 @@ class VentanaControlCaja(QMainWindow):
         texto = self.input_saldo.text()
 
         saldo = self.convertir_a_float(texto)
+        
+        self.input_saldo.setText(f"S/ {saldo:.2f}")
 
         if self.tabla.rowCount() == 0:
             self.tabla.setRowCount(1)
@@ -302,7 +307,7 @@ class VentanaControlCaja(QMainWindow):
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def recalcular_saldos(self):
-        saldo_anterior = float(self.input_saldo.text())
+        saldo_anterior = self.convertir_a_float(self.input_saldo.text())
         saldo_final = saldo_anterior
 
         for fila in range(1, self.tabla.rowCount()):
@@ -328,8 +333,7 @@ class VentanaControlCaja(QMainWindow):
             saldo_anterior = saldo
             saldo_final = saldo
          
-        self.lbl_saldo_total.setText(f"Saldo Total: S/ {saldo_final:.2f}")   
-            
+        self.lbl_saldo_total.setText(f"Saldo Total: S/ {saldo_final:.2f}")        
 
     def calcular_totales(self):
         total_ingresos = 0
@@ -368,6 +372,19 @@ class VentanaControlCaja(QMainWindow):
         # actualizar resumen superior
         self.lbl_ingresos.setText(f"Ingresos Totales: S/ {total_ingresos:.2f}")
         self.lbl_egresos.setText(f"Egresos Totales: S/ {total_egresos:.2f}")
+        
+    def cambiar_estado(self, estado):
+        if estado == "FINALIZADO" :
+            self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self.input_saldo.setEnabled(False)
+            self.combo_estado.setEnabled(False)
+        elif estado == "ACTIVO":
+            self.tabla.setEditTriggers(
+                QAbstractItemView.DoubleClicked | 
+                QAbstractItemView.EditKeyPressed |
+                QAbstractItemView.AnyKeyPressed
+            )
+            self.input_saldo.setEnabled(True) 
     
     def convertir_a_float(self, texto):
         if not texto:
