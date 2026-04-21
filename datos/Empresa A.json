@@ -1,0 +1,20 @@
+{
+    "estado": "ACTIVO",
+    "saldo_inicial": "S/ 1500.00",
+    "filas": [
+        [
+            "20/04/2026",
+            "Saldo inicial en caja",
+            "",
+            "",
+            "S/ 1500.00"
+        ],
+        [
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+    ]
+}
