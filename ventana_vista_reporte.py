@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtPrintSupport import QPrinter
 from PySide6.QtGui import QTextDocument
+from datetime import datetime
+import os
 
 class VistaReporte(QDialog):
     def __init__(self, datos, parent=None):
@@ -117,8 +119,8 @@ class VistaReporte(QDialog):
             self, "Guardar PDF", "", "PDF Files (*.pdf)"
         )
         
-        if not ruta:
-            return
+        if not ruta.endswith(".pdf"):
+            ruta += ".pdf"
         
         printer = QPrinter(QPrinter.HighResolution)
         printer.setOutputFormat(QPrinter.PdfFormat)
@@ -129,43 +131,46 @@ class VistaReporte(QDialog):
         
         doc = QTextDocument()
         doc.setHtml(contenido)
-        doc.print(printer)
+        doc.print_(printer)
         
     def generar_contenido(self):
+        with open("templates/reporte.html", "r", encoding="utf-8") as f:
+            html = f.read()
+            
+        fecha = datetime.now().strftime("%d/%m/%Y")
+        numero = self.generar_nro_reporte()
         resumen = self.datos["resumen"]
-
-        html = f"""
-        <h1>REPORTE CONTROL DE CAJA</h1>
-        <h3>Empresa: {self.datos['empresa']}</h3>
-
-        <hr>
-
-        <h3>Resumen</h3>
-        <p>{resumen['saldo_inicial']}<br>
-        {resumen['ingresos']}<br>
-        {resumen['egresos']}<br>
-        {resumen['saldo_total']}</p>
-
-        <h3>Observaciones</h3>
-        <p>{self.datos['observaciones']}</p>
-
-        <h3>Movimientos</h3>
-        <table border="1" cellspacing="0" cellpadding="4">
-            <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Ingreso</th>
-                <th>Egreso</th>
-                <th>Saldo</th>
-            </tr>
-        """
-
+        
+        filas_html = ""
         for fila in self.datos["tabla"]:
-            html += "<tr>"
+            filas_html += "<tr>"
             for valor in fila:
-                html += f"<td>{valor}</td>"
-            html += "</tr>"
+                filas_html += f"<td>{valor}</td>"
+            # filas_html += "<tr>"
 
-        html += "</table>"
-
+        # reemplazar los datos
+        html = html.replace("{{empresa}}", self.datos["empresa"])
+        html = html.replace("{{fecha}}", fecha)
+        html = html.replace("{{numero}}", numero)
+        html = html.replace("{{saldo_inicial}}", resumen["saldo_inicial"])
+        html = html.replace("{{ingresos}}", resumen["ingresos"])
+        html = html.replace("{{egresos}}", resumen["egresos"])
+        html = html.replace("{{saldo_total}}", resumen["saldo_total"])
+        html = html.replace("{{observaciones}}", self.datos["observaciones"])
+        html = html.replace("{{filas}}", filas_html)
+        
         return html
+    
+    def generar_nro_reporte(self):
+        ruta = "datos/reportes_contador.txt"
+        
+        if not os.path.exists(ruta):
+            with open(ruta, "w") as f:
+                f.write("1")
+            return "0001"
+        
+        with open(ruta, "r+") as f:
+            numero = int(f.read())
+            f.seek(0)
+            f.write(str(numero + 1))
+        return str(numero).zfill(4)
