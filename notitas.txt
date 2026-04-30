@@ -3,17 +3,18 @@ LO QUJE SE PUEDE HACER AHORA
     -  boton agregar empresa y arquitectura en ventana principal
     -  buscador de filtar por nombre fecha estado
 
-LO QUE TENEMOS UQE IMPLEMENTAR
-    -  sidebar funcional en las dos ventanas 
+LO QUE SE IMPLEMENTARA 
+    -  agregar empresa + arquitectura 
     -  que la fecha de creacion de empresa se guarde para que se ponga en fecha 
-    -  que el dise;o sea mas amigable
-    -  BD
+    -  sidebar funcional en las dos ventanas
     -  guardado de archivo(json, csv, aqlite)
+    -  que el diseño amigable
+    -  BD
     - estilizar
 
 IDEAS FUTURAS
-    - que al ingresar uno que ya esta finalizado no se pueda editar
-    - que se pueda exportar e importar a una /varias empresa de un archiv excel 
+    - empresas con proceso finalizado no editabla(bloaqueada)
+    - que se pueda exportar e importar a una /varias empresa de un archivo excel 
 
 
 
