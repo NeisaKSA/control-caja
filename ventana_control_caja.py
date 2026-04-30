@@ -490,31 +490,35 @@ class VentanaControlCaja(QMainWindow):
             self.combo_estado.blockSignals(False)
     
     def generar_reporte(self):
-        observaciones = self.observaciones_finales or "Sin Observaciones"
-        print("Generar reporte...")
-        print("Empresa: ", self.empresa)
-        print("Observaciones: ", {observaciones})
+        datos = self.obtener_datos_reporte()
         
-        contenido = f"""
-        REPORTE CONTROL DE CAJA
-
-        Empresa: {self.empresa}
-
-        Observaciones:
-        {self.observaciones_finales}
-
-        ---------------------------------------
-        """
-        
+        vista = VistaReporte(datos, self)
+        vista.exec()
+    
+    def obtener_datos_reporte(self):
+        # tabla
+        tabla = []
         for fila in range(self.tabla.rowCount()):
             fila_data = []
             for col in range(self.tabla.columnCount()):
                 item = self.tabla.item(fila, col)
                 fila_data.append(item.text() if item else "")
-            contenido += " | ".join(fila_data) + "\n"
+            tabla.append(fila_data)
             
-        vista = VistaReporte(contenido, self)
-        vista.exec()
+        # resumen
+        resumen = {
+            "saldo_inicial": self.input_saldo.text(),
+            "ingresos": self.lbl_ingresos.text(),
+            "egresos": self.lbl_egresos.text(),
+            "saldo_total": self.lbl_saldo_total.text()
+        }   
+        
+        return {
+            "empresa": self.empresa,
+            "resumen": resumen,
+            "observaciones": self.observaciones_finales or "Sin observaciones",
+            "tabla": tabla
+        }
     
     def bloquear_edicion(self):
         self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
