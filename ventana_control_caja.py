@@ -7,12 +7,15 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter
 from datetime import datetime
-
+import os
+import json
 
 class VentanaControlCaja(QMainWindow):
 
     def __init__(self, empresa):
         super().__init__()
+        
+        self.empresa = empresa
 
         self.setWindowTitle(f"Control de Caja - {empresa}")
         self.resize(1000, 600)
@@ -49,8 +52,14 @@ class VentanaControlCaja(QMainWindow):
         self.combo_estado.currentTextChanged.connect(self.cambiar_estado)
         self.combo_estado.setCurrentText("ACTIVO")
         
+        # Boton Guardar
+        self.btn_guardar = QPushButton("Guardar")
+        self.btn_guardar.setFixedWidth(80)
+        self.btn_guardar.clicked.connect(self.guardar_datos)
+        
         header.addWidget(self.btn_volver)
         header.addWidget(self.combo_estado)
+        header.addWidget(self.btn_guardar)
         header.addStretch()
         
         contenido_layout.addLayout(header)
@@ -208,6 +217,9 @@ class VentanaControlCaja(QMainWindow):
         for i in range(5):
             self.tabla_totales.setColumnWidth(i, self.tabla.columnWidth(i))
 
+        # cargar datos guardados
+        self.cargar_datos()
+        
         layout_principal.addWidget(contenido)
 
     def verificar_nueva_fila(self, item):
@@ -385,6 +397,67 @@ class VentanaControlCaja(QMainWindow):
                 QAbstractItemView.AnyKeyPressed
             )
             self.input_saldo.setEnabled(True) 
+            
+    def guardar_datos(self):
+        datos = {
+            "estado" : self.combo_estado.currentText(),
+            "saldo_inicial" : self.input_saldo.text(),
+            "filas" : []     
+        }
+        
+        for fila in range(self.tabla.rowCount()):
+            fila_data = []
+            for col in range(self.tabla.columnCount()):
+                item = self.tabla.item(fila,col)
+                fila_data.append(item.text() if item else "")
+            datos["filas"].append(fila_data)
+            
+        nombre_archivo = f"{self.empresa}.json"
+        
+        with open(nombre_archivo, "w", encoding= "utf-8") as f:
+            json.dump(datos, f, indent=4, ensure_ascii=False)
+            
+        print("Guardando en:", nombre_archivo)
+            
+    def closeEvent(self, event):
+       self.guardar_datos()
+       event.accept()
+       
+    def cargar_datos(self) :
+        nombre_archivo = f"{self.empresa}.json"
+        
+        if not os.path.exists(nombre_archivo):
+            return
+        
+        with open(nombre_archivo, "r", encoding= "utf-8") as f:
+            datos = json.load(f)
+        
+        # 🔥 BLOQUEAR EVENTOS
+        self.tabla.blockSignals(True)
+        
+        self.combo_estado.setCurrentText(datos.get("estado", "ACTIVO"))
+        self.input_saldo.setText(datos.get("saldo_inicial", "0.00"))
+        
+        self.tabla.setRowCount(0)
+        
+        for fila_data in datos["filas"]:
+            fila = self.tabla.rowCount()
+            self.tabla.insertRow(fila)
+            
+            for col, valor in enumerate(fila_data):
+                if valor:
+                    self.tabla.setItem(fila, col, QTableWidgetItem(valor))    
+         
+        self.fila_total = self.tabla.rowCount()
+        
+        # 🔥 VOLVER A ACTIVAR
+        self.tabla.blockSignals(False)
+        
+        self.recalcular_saldos()
+        self.calcular_totales()
+                  
+        print("Cargando desde:", nombre_archivo)
+    
     
     def convertir_a_float(self, texto):
         if not texto:
