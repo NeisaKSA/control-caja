@@ -1,7 +1,10 @@
 LO QUJE SE PUEDE HACER AHORA 
-    -  boton/lista de estado(palanca con coloes)
+    -  boton/lista de estado(palanca con colores) (X)
     -  boton agregar empresa y arquitectura en ventana principal
     -  buscador de filtar por nombre fecha estado
+    -  boton guardar (X)
+    -  generar reportes cuando este finalizado
+    -  resumen cuando este activo 
 
 LO QUE SE IMPLEMENTARA 
     -  agregar empresa + arquitectura 

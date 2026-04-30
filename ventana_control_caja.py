@@ -9,6 +9,8 @@ from PySide6.QtGui import QPainter
 from datetime import datetime
 import os
 import json
+from ventana_reporte import VentanaReporte
+from ventana_vista_reporte import VistaReporte
 
 class VentanaControlCaja(QMainWindow):
 
@@ -50,19 +52,29 @@ class VentanaControlCaja(QMainWindow):
         self.combo_estado = QComboBox()
         self.combo_estado.addItems(["ACTIVO", "FINALIZADO"])
         self.combo_estado.currentTextChanged.connect(self.cambiar_estado)
-        self.combo_estado.setCurrentText("ACTIVO")
+        
+        # self.combo_estado.setCurrentText("ACTIVO")
         
         # Boton Guardar
         self.btn_guardar = QPushButton("Guardar")
         self.btn_guardar.setFixedWidth(80)
         self.btn_guardar.clicked.connect(self.guardar_datos)
         
+        # boton reporte
+        self.btn_reporte = QPushButton("Ver Reporte")
+        self.btn_reporte.setEnabled(False)
+        self.btn_reporte.clicked.connect(self.generar_reporte)
+        
         header.addWidget(self.btn_volver)
         header.addWidget(self.combo_estado)
         header.addWidget(self.btn_guardar)
+        header.addWidget(self.btn_reporte)
         header.addStretch()
         
         contenido_layout.addLayout(header)
+        
+        # reporte
+        self.observaciones_finales = ""
 
         # =====================
         # TITULO
@@ -386,22 +398,18 @@ class VentanaControlCaja(QMainWindow):
         self.lbl_egresos.setText(f"Egresos Totales: S/ {total_egresos:.2f}")
         
     def cambiar_estado(self, estado):
+        print("Estado cambiado a:", estado)
+        
         if estado == "FINALIZADO" :
-            self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
-            self.input_saldo.setEnabled(False)
-            self.combo_estado.setEnabled(False)
+            self.mostrar_dialog_reporte()
         elif estado == "ACTIVO":
-            self.tabla.setEditTriggers(
-                QAbstractItemView.DoubleClicked | 
-                QAbstractItemView.EditKeyPressed |
-                QAbstractItemView.AnyKeyPressed
-            )
-            self.input_saldo.setEnabled(True) 
+            self.habilitar_edicion()
             
     def guardar_datos(self):
         datos = {
             "estado" : self.combo_estado.currentText(),
             "saldo_inicial" : self.input_saldo.text(),
+            "observaciones" : self.observaciones_finales,
             "filas" : []     
         }
         
@@ -412,7 +420,7 @@ class VentanaControlCaja(QMainWindow):
                 fila_data.append(item.text() if item else "")
             datos["filas"].append(fila_data)
             
-        nombre_archivo = f"{self.empresa}.json"
+        nombre_archivo = f"datos/{self.empresa}.json"
         
         with open(nombre_archivo, "w", encoding= "utf-8") as f:
             json.dump(datos, f, indent=4, ensure_ascii=False)
@@ -424,7 +432,8 @@ class VentanaControlCaja(QMainWindow):
        event.accept()
        
     def cargar_datos(self) :
-        nombre_archivo = f"{self.empresa}.json"
+        os.makedirs("datos", exist_ok=True)
+        nombre_archivo = f"datos/{self.empresa}.json"
         
         if not os.path.exists(nombre_archivo):
             return
@@ -434,6 +443,7 @@ class VentanaControlCaja(QMainWindow):
         
         # 🔥 BLOQUEAR EVENTOS
         self.tabla.blockSignals(True)
+        self.combo_estado.blockSignals(True)
         
         self.combo_estado.setCurrentText(datos.get("estado", "ACTIVO"))
         self.input_saldo.setText(datos.get("saldo_inicial", "0.00"))
@@ -452,12 +462,74 @@ class VentanaControlCaja(QMainWindow):
         
         # 🔥 VOLVER A ACTIVAR
         self.tabla.blockSignals(False)
+        self.combo_estado.blockSignals(False)
+        
+        if self.combo_estado.currentText() == "FINALIZADO":
+            self.bloquear_edicion()
+        else:
+            self.habilitar_edicion()
         
         self.recalcular_saldos()
         self.calcular_totales()
+        self.observaciones_finales = datos.get("observaciones", "")
                   
         print("Cargando desde:", nombre_archivo)
     
+    def mostrar_dialog_reporte(self):
+        dialogo = VentanaReporte(self)
+        
+        if dialogo.exec():
+            observaciones = dialogo.obtener_observaciones()
+            self.observaciones_finales = observaciones
+            self.generar_reporte()
+            self.bloquear_edicion()
+        else:
+            # volver a Activo si cancela
+            self.combo_estado.blockSignals(True)
+            self.combo_estado.setCurrentText("ACTIVO")
+            self.combo_estado.blockSignals(False)
+    
+    def generar_reporte(self):
+        observaciones = self.observaciones_finales or "Sin Observaciones"
+        print("Generar reporte...")
+        print("Empresa: ", self.empresa)
+        print("Observaciones: ", {observaciones})
+        
+        contenido = f"""
+        REPORTE CONTROL DE CAJA
+
+        Empresa: {self.empresa}
+
+        Observaciones:
+        {self.observaciones_finales}
+
+        ---------------------------------------
+        """
+        
+        for fila in range(self.tabla.rowCount()):
+            fila_data = []
+            for col in range(self.tabla.columnCount()):
+                item = self.tabla.item(fila, col)
+                fila_data.append(item.text() if item else "")
+            contenido += " | ".join(fila_data) + "\n"
+            
+        vista = VistaReporte(contenido, self)
+        vista.exec()
+    
+    def bloquear_edicion(self):
+        self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.input_saldo.setEnabled(False)
+        self.combo_estado.setEnabled(False)
+        self.btn_reporte.setEnabled(True)
+    
+    def habilitar_edicion(self):
+        self.tabla.setEditTriggers(
+            QAbstractItemView.DoubleClicked | 
+            QAbstractItemView.EditKeyPressed |
+            QAbstractItemView.AnyKeyPressed
+        )
+        self.input_saldo.setEnabled(True)
+        self.btn_reporte.setEnabled(False)
     
     def convertir_a_float(self, texto):
         if not texto:
