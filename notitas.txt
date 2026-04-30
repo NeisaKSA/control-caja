@@ -1,0 +1,23 @@
+LO QUJE SE PUEDE HACER AHORA 
+    -  boton/lista de estado(palanca con coloes)
+    -  boton agregar empresa y arquitectura en ventana principal
+    -  buscador de filtar por nombre fecha estado
+
+LO QUE TENEMOS UQE IMPLEMENTAR
+    -  sidebar funcional en las dos ventanas 
+    -  que la fecha de creacion de empresa se guarde para que se ponga en fecha 
+    -  que el dise;o sea mas amigable
+    -  BD
+    -  guardado de archivo(json, csv, aqlite)
+    - estilizar
+
+IDEAS FUTURAS
+    - que al ingresar uno que ya esta finalizado no se pueda editar
+    - que se pueda exportar e importar a una /varias empresa de un archiv excel 
+
+
+
+NOTITAS IMPRTANTES
+    -  JSON → guardar/cargar proyecto
+    -  CSV → exportar a Excel rápido
+    -  PDF → reportes finales

@@ -16,14 +16,19 @@ class VentanaControlCaja(QMainWindow):
 
         self.setWindowTitle(f"Control de Caja - {empresa}")
         self.resize(1000, 600)
-
+        
+        # =====================
+        # WIDGET CENTRAL
+        # =====================
         central = QWidget()
         self.setCentralWidget(central)
 
         layout_principal = QHBoxLayout()
         central.setLayout(layout_principal)
 
+        # =====================
         # SIDEBAR
+        # =====================
         sidebar = QWidget()
         sidebar_layout = QVBoxLayout()
 
@@ -39,18 +44,24 @@ class VentanaControlCaja(QMainWindow):
         sidebar.setLayout(sidebar_layout)
         sidebar.setFixedWidth(200)
 
+        # =====================
         # CONTENIDO DERECHO
+        # =====================
         contenido = QWidget()
         contenido_layout = QVBoxLayout()
         contenido.setLayout(contenido_layout)
 
+        # =====================
         # TITULO
+        # =====================
         self.lbl_titulo = QLabel(f"CONTROL DE CAJA - {empresa}")
         self.lbl_titulo.setAlignment(Qt.AlignCenter)
         self.lbl_titulo.setStyleSheet("font-size:18px; font-weight:bold;")
         contenido_layout.addWidget(self.lbl_titulo)
 
-        # BLOQUE DATOS
+        # =====================
+        # BLOQUE DATOS GENERALES
+        # =====================
         datos_widget = QWidget()
         datos_layout = QHBoxLayout()
         datos_widget.setLayout(datos_layout)
@@ -89,7 +100,9 @@ class VentanaControlCaja(QMainWindow):
         contenido_layout.addWidget(datos_widget)
         contenido_layout.addSpacing(10)
 
+        # =====================
         # TABLA MOVIMIENTOS
+        # =====================
         self.tabla = QTableWidget()
         self.tabla.setColumnCount(5)
 
@@ -98,11 +111,11 @@ class VentanaControlCaja(QMainWindow):
         ])
 
         header = self.tabla.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)    # Fecha automatico
+        header.setSectionResizeMode(1, QHeaderView.Stretch)             # Concepto
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)    # Ingreso
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)    # Egreso
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)    # Saldo
 
         self.tabla.setStyleSheet("""
             QTableWidget {
@@ -127,14 +140,18 @@ class VentanaControlCaja(QMainWindow):
         )
 
         self.tabla.setItemDelegate(SinCursorDelegate())
+        self.tabla.setItemDelegateForColumn(4, NoEditableDelegate())
 
+        # Empezar fila vacia
         self.tabla.setRowCount(1)
         self.fila_total = 1
         self.tabla.itemChanged.connect(self.verificar_nueva_fila)
 
         contenido_layout.addWidget(self.tabla)
 
+        # =====================
         # TABLA TOTALES
+        # =====================
         self.tabla_totales = QTableWidget()
         self.tabla_totales.setColumnCount(5)
         self.tabla_totales.setRowCount(1)
@@ -146,10 +163,12 @@ class VentanaControlCaja(QMainWindow):
         for i in range(5):
             self.tabla_totales.setColumnWidth(i, self.tabla.columnWidth(i))
 
+        # Oculta header
         self.tabla_totales.horizontalHeader().setVisible(False)
         self.tabla_totales.verticalHeader().setVisible(False)
+        # Bloquea edicion
         self.tabla_totales.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
+        # Estilo
         self.tabla_totales.setFixedHeight(40)
         self.tabla_totales.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.tabla_totales.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -191,36 +210,58 @@ class VentanaControlCaja(QMainWindow):
     def verificar_nueva_fila(self, item):
         fila = item.row()
         columna = item.column()
-
+        
         if item.row() == self.fila_total:
             return
 
         self.tabla.blockSignals(True)
 
         if columna in (2, 3):
-            try:
-                ingreso_item = self.tabla.item(fila, 2)
-                egreso_item = self.tabla.item(fila, 3)
+            ingreso_item = self.tabla.item(fila, 2)
+            egreso_item = self.tabla.item(fila, 3)
 
-                ingreso = float(ingreso_item.text()) if ingreso_item and ingreso_item.text() else 0
-                egreso = float(egreso_item.text()) if egreso_item and egreso_item.text() else 0
+            ingreso = self.convertir_a_float(
+                ingreso_item.text() if ingreso_item else ""
+            )
 
-                if ingreso == 0 and egreso == 0:
-                    self.tabla.setItem(fila, 4, QTableWidgetItem(""))
+            egreso = self.convertir_a_float(
+                egreso_item.text() if egreso_item else ""
+            )
+
+            # evitar ingreso y egreso al mismo tiempo
+            if ingreso > 0 and egreso > 0:
+                if columna == 2:
+                    egreso = 0
+                    self.tabla.setItem(fila, 3, QTableWidgetItem(""))
                 else:
-                    if fila == 0:
-                        saldo_anterior = float(self.input_saldo.text())
-                    else:
-                        saldo_item = self.tabla.item(fila - 1, 4)
-                        saldo_anterior = float(saldo_item.text()) if saldo_item and saldo_item.text() else 0
+                    ingreso = 0
+                    self.tabla.setItem(fila, 2, QTableWidgetItem(""))
 
-                    saldo = saldo_anterior + ingreso - egreso
-                    self.tabla.setItem(fila, 4, QTableWidgetItem(f"{saldo:.2f}"))
+            # formatear moneda
+            if ingreso != 0:
+                self.formatear_moneda(fila, 2, ingreso)
 
-                self.recalcular_saldos()
+            if egreso != 0:
+                self.formatear_moneda(fila, 3, egreso)
 
-            except:
-                pass
+            # calcular saldo
+            if fila != 0 and ingreso == 0 and egreso == 0:
+                self.tabla.setItem(fila, 4, QTableWidgetItem(""))
+            else:
+                if fila == 0:
+                    saldo_anterior = self.convertir_a_float(self.input_saldo.text())
+                else:
+                    saldo_item = self.tabla.item(fila - 1, 4)
+                    saldo_anterior = self.convertir_a_float(
+                        saldo_item.text() if saldo_item else ""
+                    )
+
+                saldo = saldo_anterior + ingreso - egreso
+                saldo_item = QTableWidgetItem(f"S/ {saldo:.2f}")
+                saldo_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                self.tabla.setItem(fila, 4, saldo_item)
+
+            self.recalcular_saldos()
 
         if columna in (1, 2, 3):
             fecha_item = self.tabla.item(fila, 0)
@@ -235,14 +276,11 @@ class VentanaControlCaja(QMainWindow):
 
         self.calcular_totales()
         self.tabla.blockSignals(False)
-
+        
     def colocar_saldo_inicial(self):
         texto = self.input_saldo.text()
 
-        try:
-            saldo = float(texto)
-        except ValueError:
-            return
+        saldo = self.convertir_a_float(texto)
 
         if self.tabla.rowCount() == 0:
             self.tabla.setRowCount(1)
@@ -251,30 +289,46 @@ class VentanaControlCaja(QMainWindow):
         self.tabla.setItem(0, 2, QTableWidgetItem(""))
         self.tabla.setItem(0, 3, QTableWidgetItem(""))
 
-        item_saldo = QTableWidgetItem(f"{saldo:.2f}")
+        item_saldo = QTableWidgetItem(f"S/ {saldo:.2f}")
         item_saldo.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         self.tabla.setItem(0, 4, item_saldo)
+        
+        self.recalcular_saldos()
+        self.calcular_totales()
+        
+        for col in range(5) :
+            item = self.tabla.item(0, col)
+            if item :
+                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def recalcular_saldos(self):
         saldo_anterior = float(self.input_saldo.text())
+        saldo_final = saldo_anterior
 
         for fila in range(1, self.tabla.rowCount()):
             ingreso_item = self.tabla.item(fila, 2)
             egreso_item = self.tabla.item(fila, 3)
-
-            ingreso = float(ingreso_item.text()) if ingreso_item and ingreso_item.text() else 0
-            egreso = float(egreso_item.text()) if egreso_item and egreso_item.text() else 0
+            
+            ingreso = self.convertir_a_float(
+                ingreso_item.text() if ingreso_item else ""
+            )
+            egreso = self.convertir_a_float(
+                egreso_item.text() if egreso_item else ""
+            )
 
             if ingreso == 0 and egreso == 0:
                 self.tabla.setItem(fila, 4, QTableWidgetItem(""))
                 continue
 
             saldo = saldo_anterior + ingreso - egreso
-            self.tabla.setItem(fila, 4, QTableWidgetItem(f"{saldo:.2f}"))
+            saldo_item = QTableWidgetItem(f"S/ {saldo:.2f}")
+            saldo_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.tabla.setItem(fila, 4, saldo_item)
 
             saldo_anterior = saldo
+            saldo_final = saldo
          
-        self.lbl_saldo_total.setText(f"Saldo Total: S/ {saldo:.2f}")   
+        self.lbl_saldo_total.setText(f"Saldo Total: S/ {saldo_final:.2f}")   
             
 
     def calcular_totales(self):
@@ -285,8 +339,12 @@ class VentanaControlCaja(QMainWindow):
             ingreso_item = self.tabla.item(fila, 2)
             egreso_item = self.tabla.item(fila, 3)
 
-            ingreso = float(ingreso_item.text()) if ingreso_item and ingreso_item.text() else 0
-            egreso = float(egreso_item.text()) if egreso_item and egreso_item.text() else 0
+            ingreso = self.convertir_a_float(
+                ingreso_item.text() if ingreso_item else ""
+            )
+            egreso = self.convertir_a_float(
+                egreso_item.text() if egreso_item else ""
+            )
 
             total_ingresos += ingreso
             total_egresos += egreso
@@ -310,8 +368,23 @@ class VentanaControlCaja(QMainWindow):
         # actualizar resumen superior
         self.lbl_ingresos.setText(f"Ingresos Totales: S/ {total_ingresos:.2f}")
         self.lbl_egresos.setText(f"Egresos Totales: S/ {total_egresos:.2f}")
+    
+    def convertir_a_float(self, texto):
+        if not texto:
+            return 0.0
         
-
+        try:
+            return float(texto.replace("S/", "").replace(",", "").strip())
+        except:
+            return 0.0
+        
+    def formatear_moneda(self, fila, columna, valor):
+        item = QTableWidgetItem(f"S/ {valor:.2f}")
+        item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        
+        self.tabla.blockSignals(True)
+        self.tabla.setItem(fila, columna, item)
+        self.tabla.blockSignals(False)
 
 class SinCursorDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
