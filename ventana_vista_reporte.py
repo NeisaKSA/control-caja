@@ -4,9 +4,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from PySide6.QtPrintSupport import QPrinter
-from PySide6.QtGui import QTextDocument
+from PySide6.QtGui import QTextDocument, QFont
 from datetime import datetime
 import os
+from utils.exportador import Exportador
 
 class VistaReporte(QDialog):
     def __init__(self, datos, parent=None):
@@ -107,6 +108,7 @@ class VistaReporte(QDialog):
         layout.addLayout(botones)
         
         btn_pdf.clicked.connect(self.exportar_pdf)
+        btn_excel.clicked.connect(self.exportar_excel)
         
         self.setLayout(layout)
         
@@ -119,58 +121,30 @@ class VistaReporte(QDialog):
             self, "Guardar PDF", "", "PDF Files (*.pdf)"
         )
         
+        if not ruta:
+            return
+        
         if not ruta.endswith(".pdf"):
             ruta += ".pdf"
-        
-        printer = QPrinter(QPrinter.HighResolution)
-        printer.setOutputFormat(QPrinter.PdfFormat)
-        printer.setOutputFileName(ruta)
-        
-        # contenido em texto
-        contenido = self.generar_contenido()
-        
-        doc = QTextDocument()
-        doc.setHtml(contenido)
-        doc.print_(printer)
-        
-    def generar_contenido(self):
-        with open("templates/reporte.html", "r", encoding="utf-8") as f:
-            html = f.read()
             
-        fecha = datetime.now().strftime("%d/%m/%Y")
-        numero = self.generar_nro_reporte()
-        resumen = self.datos["resumen"]
+        print("Ruta PDF:", ruta)
         
-        filas_html = ""
-        for fila in self.datos["tabla"]:
-            filas_html += "<tr>"
-            for valor in fila:
-                filas_html += f"<td>{valor}</td>"
-            # filas_html += "<tr>"
-
-        # reemplazar los datos
-        html = html.replace("{{empresa}}", self.datos["empresa"])
-        html = html.replace("{{fecha}}", fecha)
-        html = html.replace("{{numero}}", numero)
-        html = html.replace("{{saldo_inicial}}", resumen["saldo_inicial"])
-        html = html.replace("{{ingresos}}", resumen["ingresos"])
-        html = html.replace("{{egresos}}", resumen["egresos"])
-        html = html.replace("{{saldo_total}}", resumen["saldo_total"])
-        html = html.replace("{{observaciones}}", self.datos["observaciones"])
-        html = html.replace("{{filas}}", filas_html)
+        html = Exportador.generar_html(self.datos)
+        Exportador.exportar_pdf(html, ruta)
         
-        return html
-    
-    def generar_nro_reporte(self):
-        ruta = "datos/reportes_contador.txt"
+    def exportar_excel(self):
+        ruta, _ = QFileDialog.getSaveFileName(
+            self, "Guardar Excel", "", "EXCEL Files (*.xlsx)"
+        )
         
-        if not os.path.exists(ruta):
-            with open(ruta, "w") as f:
-                f.write("1")
-            return "0001"
+        if not ruta:
+            return
         
-        with open(ruta, "r+") as f:
-            numero = int(f.read())
-            f.seek(0)
-            f.write(str(numero + 1))
-        return str(numero).zfill(4)
+        if not ruta.endswith(".xlsx"):
+            ruta += ".xlsx"
+        
+        print("Ruta EXCEL:", ruta)
+        
+        Exportador.generar_excel(self.datos, ruta)
+        
+        

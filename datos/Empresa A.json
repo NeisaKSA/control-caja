@@ -1,35 +1,35 @@
 {
-    "estado": "ACTIVO",
-    "saldo_inicial": "S/ 1500.00",
-    "observaciones": "",
+    "estado": "FINALIZADO",
+    "saldo_inicial": "S/ 1300.00",
+    "observaciones": "al control de caja quedo saldo restante 70 soles el cual sera depositado a la empresa",
     "filas": [
         [
-            "20/04/2026",
+            "25/04/2026",
             "Saldo inicial en caja",
             "",
             "",
-            "S/ 1500.00"
+            "S/ 1300.00"
         ],
         [
-            "21/04/2026",
-            "lapiceros",
+            "25/04/2026",
+            "lapoiceros 30",
             "",
             "S/ 50.00",
-            "S/ 1450.00"
+            "S/ 1250.00"
         ],
         [
-            "21/04/2026",
+            "25/04/2026",
+            "teclado",
             "",
-            "",
-            "S/ 190.00",
-            "S/ 1260.00"
+            "S/ 80.00",
+            "S/ 1170.00"
         ],
         [
-            "21/04/2026",
-            "sakdo agrgado",
-            "S/ 250.00",
+            "25/04/2026",
+            "fgdfdfg",
             "",
-            "S/ 1510.00"
+            "S/ 1100.00",
+            "S/ 70.00"
         ],
         [
             "",
