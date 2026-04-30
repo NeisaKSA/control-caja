@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .titulo {
+            font-size: 250px;
+            font-weight: bold;
+            margin-bottom: 10px
+        }
+
+        .empresa {
+            font-size: 200px;
+            margin-top: 5px;
+        }
+
+        .info {
+            text-align: right;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .tabla th {
+            background-color: #1f2d3d;
+            color: white;
+            padding: 8px;
+        }
+
+        .tabla td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: right;
+        }
+
+        .tabla td.concepto {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <div class="titulo">REPORTE CONTROL DE CAJA</div>
+            <div class="empresa">Empresa: {{empresa}}</div>
+        </div>
+
+        <div class="info">
+            <p><b>Fecha:</b> {{fecha}}</p>
+            <p><b>Reporte N°:</b> {{numero}}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="section box">
+        <b>Resumen</b><br>
+        Saldo Inicial: {{saldo_inicial}}<br>
+        {{ingresos}}<br>
+        {{egresos}}<br>
+        <b>{{saldo_total}}</b>
+    </div>
+
+    <div class="section box">
+        <b>Observaciones</b><br>
+        {{observaciones}}
+    </div>
+
+    <div class="section">
+        <b>Movimientos</b>
+
+        <table class="tabla">
+            <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Ingreso</th>
+                <th>Egreso</th>
+                <th>Saldo</th>
+            </tr>
+            <tbody>
+                {{filas}}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
