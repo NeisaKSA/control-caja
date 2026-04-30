@@ -1,6 +1,6 @@
 from PySide6.QtPrintSupport import QPrinter
 from PySide6.QtGui import QTextDocument, QFont
-from openpyxl import Workbook
+from openpyxl import load_workbook 
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
 import os
@@ -49,7 +49,7 @@ class Exportador:
     
     @staticmethod
     def generar_excel(datos, ruta):
-        wb = Workbook()
+        wb = load_workbook("templates/reporte_base.xlsx")
         ws = wb.active
         ws.title = "Reporte"
         
@@ -57,36 +57,46 @@ class Exportador:
         numero = Exportador.generar_nro_reporte()
         resumen = datos["resumen"]
         
-        ws["A1"] = "REPORTE CONTROL DE CAJA"
-        ws["A2"] = f"Empresa: {datos['empresa']}"
-        ws["E1"] = "Fecha:"
-        ws["F1"] = fecha
-        ws["E2"] = "N°:"
-        ws["F2"] = numero
+        # 🔹 llenar datos fijos
+        ws["C3"] = "REPORTE CONTROL DE CAJA"
+        ws["C6"] = f"Empresa: {datos['empresa']}"
+        ws["G3"] = fecha    # fecha de reporte
+        ws["G4"] = numero   # nro de reporte
         
-        ws.merge_cells("A1:D1")
+        # RESUMEN 
+        ws["G6"] = Exportador.conversor_nro(resumen["saldo_inicial"])# lo demas se calcula
         
-        ws["A4"] = "Resumen"
-        ws["A5"] = "Saldo Inicial"
-        ws["B5"] = resumen["saldo_inicial"]
-        ws["C5"] = resumen["ingresos"]
-        ws["D5"] = resumen["egresos"]
-        ws["E5"] = resumen["saldo_total"]
-        
-        fila_inicio = 12
+        ws["C12"] = datos["observaciones"]
 
-        headers = ["Fecha", "Concepto", "Ingreso", "Egreso", "Saldo"]
-
-        for col, header in enumerate(headers, start=1):
-            ws.cell(row=fila_inicio, column=col, value=header)
+        # 🔹 tabla
+        fila_inicio = 15  # debajo del header
+        
+        
+        for i, fila in enumerate(datos["tabla"], start=fila_inicio):
+            ws[f"C{i}"] = fila[0]  # Fecha
+            ws[f"D{i}"] = fila[1]  # Concepto
+            ws[f"E{i}"] = Exportador.conversor_nro(fila[2])  # Ingreso
+            ws[f"F{i}"] = Exportador.conversor_nro(fila[3])  # Egreso
             
-        for i, fila in enumerate(datos["tabla"], start=fila_inicio + 1):
-            for j, valor in enumerate(fila, start=1):
-                ws.cell(row=i, column=j, value=valor)
-                
         wb.save(ruta)
-             
             
+    def conversor_nro(valor):
+        if not valor:
+            return 0
+        
+        print("VALOR ORIGINAL:", valor)
+        
+        try:
+            # limpiamos texto
+            valor = str(valor)
+            valor = valor.replace("S/", "")
+            valor = valor.replace(",", "")
+            valor = valor.strip()
+            
+            return float(valor)
+        except:
+            return 0
+   
     @staticmethod
     def generar_nro_reporte():
         ruta = "datos/reportes_contador.txt"

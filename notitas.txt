@@ -5,6 +5,7 @@ LO QUJE SE PUEDE HACER AHORA
     -  boton guardar (X)
     -  generar reportes cuando este finalizado
     -  resumen cuando este activo 
+    -  eliminar la ultima fila   
 
 LO QUE SE IMPLEMENTARA 
     -  agregar empresa + arquitectura 
@@ -12,6 +13,7 @@ LO QUE SE IMPLEMENTARA
     -  sidebar funcional en las dos ventanas
     -  guardado de archivo(json, csv, aqlite)
     -  que el diseño amigable
+    -  guardar la fecha en formato ISO(yyyy-mm-dd) y mostrar (dd/mm/yyyy)
     -  BD
     - estilizar
 
@@ -19,9 +21,30 @@ IDEAS FUTURAS
     - empresas con proceso finalizado no editabla(bloaqueada)
     - que se pueda exportar e importar a una /varias empresa de un archivo excel 
 
-
-
 NOTITAS IMPRTANTES
     -  JSON → guardar/cargar proyecto
     -  CSV → exportar a Excel rápido
     -  PDF → reportes finales
+
+VALIDACIONES
+VALIDACIONES DE VENTANA CONTROL DE CAJA
+    -  fecha no permita letras(fecha invalida)
+    -  ingreso/egreso no permita negativos
+    -  contenido no vacio almenos 3 caracterires para agregar filtar
+    -  formato de fecha hibrido (DatePicker, input libre)
+
+ANALISIS
+REPORTE
+    EXCEL
+    -  ¿que pasa si las filas puestas por defecto en la plantilla no son suficinetes como funcionarian?
+    -  ¿que pasa si las filas son menos queda un espacio grande libre ?
+    -  ¿la formula sigue aunque no haya datos almacenados ?
+    -  ¿que pasa si editan el exceldeberia de ser no editable??
+_____________________________________________________
+|                                                   |
+|   "El sistema debe de ser mas facil que Excel"    |
+|___________________________________________________|
+|   - ¿qué pasa si el usuario hace algo mal?        |
+|   - ¿qué pasa si deja vacío?                      |
+|   - ¿qué pasa si borra algo?                      |
+|___________________________________________________|
