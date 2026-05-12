@@ -69,8 +69,15 @@ class VistaReporte(QDialog):
         self.setLayout(layout)
         
         # tabla
+        tabla_limpia = [
+            fila for fila in datos["tabla"]
+            if any(str(c).strip() != "" for c in fila)
+        ]
+        
+        datos["tabla"] = tabla_limpia
+        
         tabla = QTableWidget()
-        tabla.setRowCount(len(datos["tabla"]))
+        tabla.setRowCount(len(tabla_limpia))
         tabla.setColumnCount(len(datos["tabla"][0]) if datos["tabla"] else 0)
         
         tabla.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -81,7 +88,7 @@ class VistaReporte(QDialog):
             "Fecha", "Concepto", "Ingreso", "Egreso", "Saldo"
         ])
         
-        for i, fila in enumerate(datos["tabla"]):
+        for i, fila in enumerate(tabla_limpia):
             for j, valor in enumerate(fila):
                 tabla.setItem(i, j, QTableWidgetItem(valor))
         layout.addWidget(tabla)
