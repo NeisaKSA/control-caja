@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QTextEdit,
-    QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton, QHeaderView, QFileDialog
+    QTableWidget, QTableWidgetItem, QHBoxLayout, QPushButton, QHeaderView, QFileDialog, QDialog, QVBoxLayout,
+    QHBoxLayout, QPushButton,
+    QFileDialog, QTextBrowser, QFrame
 )
 from PySide6.QtCore import Qt
 from PySide6.QtPrintSupport import QPrinter
-from PySide6.QtGui import QTextDocument, QFont
+from PySide6.QtGui import QTextDocument, QFont, QColor
 from datetime import datetime
 import os
 from utils.exportador import Exportador
@@ -13,27 +15,33 @@ class VistaReporte(QDialog):
     def __init__(self, datos, parent=None):
         super().__init__(parent)
         
+        with open("styles/vista_reporte.qss", "r") as f:
+            self.setStyleSheet(f.read())
+        
         self.setWindowTitle("Reporte Final")
         self.resize(800, 600)
         
         layout = QVBoxLayout()
         
+        contenedor = QVBoxLayout()
+        contenedor.setContentsMargins(40, 30, 40, 30)
+        contenedor.setSpacing(15)
+        
         titulo_resumen = QLabel("RESUMEN FINANCIERO")
-        titulo_resumen.setStyleSheet("""
-        font-size: 14px;
-        font-weight: bold;
-        margin-top: 10px;
-        """)
-        layout.addWidget(titulo_resumen)
+        titulo_resumen.setObjectName("tituloReporte")
+        contenedor.addWidget(titulo_resumen)
         
         titulo_resumen.setAlignment(Qt.AlignCenter)
         
-        linea = QLabel("────────────────────────")
-        layout.addWidget(linea)
+        linea = QFrame()
+        linea.setFrameShape(QFrame.HLine)
+        linea.setObjectName("lineaSeparador")
+        contenedor.addWidget(linea)
         
         # empresa
         lbl_empresa = QLabel(f"Empresa: {datos['empresa']}")
-        layout.addWidget(lbl_empresa)
+        lbl_empresa.setObjectName("empresaLabel")
+        contenedor.addWidget(lbl_empresa)
         
         # resumen
         resumen = datos["resumen"]
@@ -45,26 +53,35 @@ class VistaReporte(QDialog):
             f"{resumen['saldo_total']}"
         )
         
-        lbl_resumen.setStyleSheet("""
-        font-family: Consolas;
-        font-size: 12px;
-        """)
-        
         lbl_resumen.setWordWrap(True)
         lbl_resumen.setAlignment(Qt.AlignLeft)
         
-        layout.addWidget(lbl_resumen)
+        # CARD
+        card_resumen = QFrame()
+        card_resumen.setObjectName("cardResumen")
+        
+        card_layout = QVBoxLayout()
+        card_layout.setContentsMargins(15, 15, 15, 15)
+        card_layout.setSpacing(10)
+        
+        # contenedor.addWidget(lbl_resumen)
+        card_layout.addWidget(lbl_empresa)
+        card_layout.addWidget(lbl_resumen)
+        
+        card_resumen.setLayout(card_layout)
+
+        contenedor.addWidget(card_resumen)
         
         # Observaciones
         lbl_obs = QLabel("Observaciones:")
-        layout.addWidget(lbl_obs)
+        contenedor.addWidget(lbl_obs)
 
         txt_obs = QTextEdit()
         txt_obs.setPlainText(datos["observaciones"])
         txt_obs.setReadOnly(True)
         txt_obs.setFixedHeight(50)
 
-        layout.addWidget(txt_obs)
+        contenedor.addWidget(txt_obs)
 
         self.setLayout(layout)
         
@@ -90,8 +107,16 @@ class VistaReporte(QDialog):
         
         for i, fila in enumerate(tabla_limpia):
             for j, valor in enumerate(fila):
-                tabla.setItem(i, j, QTableWidgetItem(valor))
-        layout.addWidget(tabla)
+                item = QTableWidgetItem(valor)
+                
+                if j == 2:
+                    item.setBackground(QColor("#e8f5e9"))
+                    
+                if j == 3:
+                    item.setBackground(QColor("#ffebee"))
+                
+                tabla.setItem(i, j, item)
+        contenedor.addWidget(tabla)
         
         header = tabla.horizontalHeader()
         
@@ -112,6 +137,7 @@ class VistaReporte(QDialog):
         botones.addWidget(btn_excel)
         botones.addWidget(btn_cerrar)
         
+        layout.addLayout(contenedor)
         layout.addLayout(botones)
         
         btn_pdf.clicked.connect(self.exportar_pdf)
