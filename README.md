@@ -24,6 +24,11 @@ Aplicacion de escritorio para el control de caja por empresa, con una intefaz in
 📌 **Estado del proyecto** 
   En proceso de Desarrollo
 
+## Diagramas
+### Diagrama de Actividades
+![Diagrama de Actividades](docs/diagrama_actividades.png)
+Describe el flujo general del sistema desde la creación de una empresa hasta la generación del reporte final.
+
 👩‍💻 **Autor** 
  Neisa K. Salazar
  

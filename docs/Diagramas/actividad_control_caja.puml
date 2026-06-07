@@ -1,0 +1,19 @@
+@startuml
+start
+:Abrir Sistema;
+:Seleccionar empresa;
+if (¿Empresa existe?) then (yes)
+else (no)
+  :process Crear empresa;
+endif
+:Abrir control de caja;
+repeat
+  :Ingresar movimientos;
+  :Calcular saldo;
+  :Guardar cambios;
+repeat while (¿Caja finalizada?) is (no) not (yes)
+:Agregar observaciones;
+:Generar reporte;
+:Exportar PDF/Excel;
+stop
+@enduml
