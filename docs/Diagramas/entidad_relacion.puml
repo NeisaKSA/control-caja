@@ -1,0 +1,27 @@
+@startchen
+left to right direction
+
+entity empresa {
+    PK id_empresa <<key>>
+    nombre
+    fecha_creacion
+    fecha_finalizacion
+    estado
+    saldo_inicial
+    observacion
+}
+entity movimiento {
+    PK id_movimiento <<key>>
+    fecha
+    concepto
+    ingreso
+    egreso 
+    saldo
+}
+relationship registra {
+}
+
+empresa -1- registra
+registra -N- movimiento
+
+@endchen

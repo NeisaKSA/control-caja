@@ -29,6 +29,12 @@ Aplicacion de escritorio para el control de caja por empresa, con una intefaz in
 ![Diagrama de Actividades](docs/diagrama_actividades.png)
 Describe el flujo general del sistema desde la creación de una empresa hasta la generación del reporte final.
 
+### Diagrama Entidad - Relacion
+![Diagrama Entidad - Relacion](docs/Diagramas/diagrama_entidad_relacion.png)
+
+### Modelo Relacional
+![Modelo Relacional](docs/Diagramas/modelo_relacional.png)
+
 👩‍💻 **Autor** 
  Neisa K. Salazar
  

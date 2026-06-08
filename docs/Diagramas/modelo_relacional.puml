@@ -1,0 +1,25 @@
+@startuml
+entity "empresa" {
+    * id_empresa : integer <<generated>>
+    --
+    nombre : text
+    fecha_creacion : text -- Formato YYYY-MM-DD
+    fecha_finalizacion : text -- Formato YYYY-MM-DD
+    estado : text
+    saldo_inicial : decimal(10,2)
+    observacion : text
+}
+
+entity "movimiento" {
+    * id_movimiento : integer <<generated>>
+    --
+    * id_empresa : integer <<FK>>
+    fecha : text -- Formato YYYY-MM-DD
+    concepto : text
+    ingreso : decimal(10,2)
+    egreso : decimal(10,2)
+    saldo : decimal(10,2)
+}
+
+empresa ||--o{ movimiento : "tiene"
+@endum
