@@ -8,6 +8,7 @@ from PySide6.QtCore import Qt, QPropertyAnimation
 
 from delegates import ButtonDelegate
 from ventana_control_caja import VentanaControlCaja
+from dialog_empresa import DialogEmpresa
 
 class VentanaPrincipal(QMainWindow):
 
@@ -134,6 +135,11 @@ class VentanaPrincipal(QMainWindow):
         titulo.setStyleSheet("font-size: 18px; font-weight: bold;")
         self.contenido_layout.addWidget(titulo)
 
+        # boton agregar
+        btn_agregar = QPushButton("+ Nueva Empresa")
+        btn_agregar.clicked.connect(self.abrir_dialog_empresa)
+        self.contenido_layout.addWidget(btn_agregar)
+
         # Modelo
         self.model = QStandardItemModel()
         headers = ["Empresa", "Fecha inicio", "Estado", "Acción"]
@@ -240,3 +246,19 @@ class VentanaPrincipal(QMainWindow):
         self.tabla_caja.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         self.contenido_layout.addWidget(self.tabla_caja)
+
+    def abrir_dialog_empresa(self):
+        dialog = DialogEmpresa(self)
+        
+        if dialog.exec():
+            nombre = dialog.txt_nombre.text()
+            if not nombre:
+                return
+            
+            saldo = dialog.txt_saldo.text()
+            
+            self.ventana = VentanaControlCaja(nombre)
+            self.ventana.show()
+            
+            print(nombre)
+            print(saldo)

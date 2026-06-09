@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QStyledItemDelegate, QApplication, QStyle, QStyleOptionButton
 from PySide6.QtCore import QModelIndex, Signal, QEvent
 
-# =====================
-# BOTON TABLA EMPRESA
-# =====================
+# ==============================
+# BOTON TABLA EMPRESA (INGRESAR)
+# ==============================
 class ButtonDelegate(QStyledItemDelegate):
     clicked = Signal(QModelIndex)
 
