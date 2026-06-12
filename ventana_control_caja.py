@@ -14,10 +14,11 @@ from ventana_vista_reporte import VistaReporte
 
 class VentanaControlCaja(QMainWindow):
 
-    def __init__(self, empresa):
+    def __init__(self, empresa, saldo_inicial="0.00"):
         super().__init__()
         
         self.empresa = empresa
+        self.saldo_inicial = saldo_inicial
 
         self.setWindowTitle(f"Control de Caja - {empresa}")
         self.resize(1000, 600)
@@ -104,7 +105,8 @@ class VentanaControlCaja(QMainWindow):
 
         fila_saldo = QHBoxLayout()
         lbl_saldo = QLabel("Saldo Inicial:")
-        self.input_saldo = QLineEdit("0.00")
+        self.input_saldo = QLineEdit()
+        self.input_saldo.setText(self.saldo_inicial)
 
         self.input_saldo.setFixedWidth(100)
         self.input_saldo.editingFinished.connect(self.colocar_saldo_inicial)
@@ -229,6 +231,11 @@ class VentanaControlCaja(QMainWindow):
         for i in range(5):
             self.tabla_totales.setColumnWidth(i, self.tabla.columnWidth(i))
 
+        # self.colocar_saldo_inicial()
+        self.input_saldo.setText(self.saldo_inicial)
+        self.fecha_creacion = ""
+        self.fecha_finalizacion = ""
+
         # cargar datos guardados
         self.cargar_datos()
         
@@ -305,6 +312,7 @@ class VentanaControlCaja(QMainWindow):
         self.tabla.blockSignals(False)
         
     def colocar_saldo_inicial(self):
+        print("ENTRANDO A COLOCAR SALDO")
         texto = self.input_saldo.text()
 
         saldo = self.convertir_a_float(texto)
@@ -314,6 +322,8 @@ class VentanaControlCaja(QMainWindow):
         if self.tabla.rowCount() == 0:
             self.tabla.setRowCount(1)
 
+        fecha = datetime.now().strftime("%d/%m/%Y")
+        self.tabla.setItem(0, 0, QTableWidgetItem(fecha))
         self.tabla.setItem(0, 1, QTableWidgetItem("Saldo inicial en caja"))
         self.tabla.setItem(0, 2, QTableWidgetItem(""))
         self.tabla.setItem(0, 3, QTableWidgetItem(""))
@@ -329,6 +339,8 @@ class VentanaControlCaja(QMainWindow):
             item = self.tabla.item(0, col)
             if item :
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                
+        print("Filas:", self.tabla.rowCount())
 
     def recalcular_saldos(self):
         saldo_anterior = self.convertir_a_float(self.input_saldo.text())
@@ -407,10 +419,13 @@ class VentanaControlCaja(QMainWindow):
             
     def guardar_datos(self):
         datos = {
-            "estado" : self.combo_estado.currentText(),
-            "saldo_inicial" : self.input_saldo.text(),
-            "observaciones" : self.observaciones_finales,
-            "filas" : []     
+            "nombre": self.empresa,
+            "fecha_creacion": self.fecha_creacion,
+            "fecha_finalizacion": self.fecha_finalizacion,
+            "estado": self.combo_estado.currentText(),
+            "saldo_inicial": self.input_saldo.text(),
+            "observaciones": self.observaciones_finales,
+            "filas": [] 
         }
         
         for fila in range(self.tabla.rowCount()):
@@ -418,8 +433,12 @@ class VentanaControlCaja(QMainWindow):
             for col in range(self.tabla.columnCount()):
                 item = self.tabla.item(fila,col)
                 fila_data.append(item.text() if item else "")
-            datos["filas"].append(fila_data)
+                
+            if all(valor == "" for valor in fila_data):
+                continue
             
+            datos["filas"].append(fila_data)
+    
         nombre_archivo = f"datos/{self.empresa}.json"
         
         with open(nombre_archivo, "w", encoding= "utf-8") as f:
@@ -450,6 +469,8 @@ class VentanaControlCaja(QMainWindow):
         
         self.tabla.setRowCount(0)
         
+        print("Filas JSON:", len(datos["filas"]))
+        
         for fila_data in datos["filas"]:
             fila = self.tabla.rowCount()
             self.tabla.insertRow(fila)
@@ -471,10 +492,22 @@ class VentanaControlCaja(QMainWindow):
         
         self.recalcular_saldos()
         self.calcular_totales()
+        self.fecha_creacion = datos.get("fecha_creacion", "")
+        self.fecha_finalizacion = datos.get("fecha_finalizacion", "")
         self.observaciones_finales = datos.get("observaciones", "")
                   
         print("Cargando desde:", nombre_archivo)
+        
+        if len(datos["filas"]) == 0:
+            self.inicializar_empresa_nueva()
     
+    def iniciar_empresa_nueva(self):
+        self.colocar_saldo_inicial()
+        if self.tabla.rowCount() == 1:
+            self.tabla.insertRow(1)
+
+        self.fila_total = self.tabla.rowCount()
+        
     def mostrar_dialog_reporte(self):
         dialogo = VentanaReporte(self)
         

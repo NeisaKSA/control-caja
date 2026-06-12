@@ -1,0 +1,38 @@
+{
+    "nombre": "anita",
+    "fecha_creacion": "2026-06-11",
+    "fecha_finalizacion": "",
+    "estado": "ACTIVO",
+    "saldo_inicial": "S/ 150.00",
+    "observaciones": "",
+    "filas": [
+        [
+            "11/06/2026",
+            "Saldo inicial en caja",
+            "",
+            "",
+            "S/ 150.00"
+        ],
+        [
+            "11/06/2026",
+            "fgdfgrgd",
+            "",
+            "S/ 100.00",
+            "S/ 50.00"
+        ],
+        [
+            "11/06/2026",
+            "rfrf",
+            "",
+            "S/ 25.00",
+            "S/ 25.00"
+        ],
+        [
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+    ]
+}

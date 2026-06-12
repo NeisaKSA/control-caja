@@ -5,6 +5,9 @@ from PySide6.QtWidgets import (
 ) 
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt, QPropertyAnimation
+from datetime import datetime
+import os
+import json
 
 from delegates import ButtonDelegate
 from ventana_control_caja import VentanaControlCaja
@@ -251,14 +254,45 @@ class VentanaPrincipal(QMainWindow):
         dialog = DialogEmpresa(self)
         
         if dialog.exec():
-            nombre = dialog.txt_nombre.text()
+            nombre = dialog.txt_nombre.text().strip()
             if not nombre:
                 return
             
-            saldo = dialog.txt_saldo.text()
+            saldo = dialog.txt_saldo.text().strip()
+            if not saldo:
+                saldo = "0.00"
             
-            self.ventana = VentanaControlCaja(nombre)
+            # crear archivo json
+            self.crear_empresa(nombre, saldo)
+            
+            # Abrir control de caja
+            self.ventana = VentanaControlCaja(nombre, saldo)
             self.ventana.show()
             
-            print(nombre)
-            print(saldo)
+            print("Empresa:", nombre)
+            print("Saldo:", saldo)
+            
+    def crear_empresa(self, nombre, saldo):
+        fecha_actual = datetime.now().strftime("%Y-%m-%d")
+        
+        datos = {
+            "nombre": nombre,
+            "fecha_creacion": fecha_actual,
+            "fecha_finalizacion": "",
+            "estado": "ACTIVO",
+            "saldo_inicial": saldo,
+            "observaciones": "",
+            "filas": []
+        }
+        
+        os.makedirs("datos", exist_ok=True)
+
+        nombre_archivo = f"datos/{nombre}.json"
+        
+        if os.path.exists(nombre_archivo):
+            print("La empresa ya existe")
+            return
+        
+        with open(nombre_archivo, "w", encoding="utf-8") as f:
+            json.dump(datos, f, indent=4, ensure_ascii=False)
+        print("Empresa creada:", nombre_archivo)
