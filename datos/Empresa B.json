@@ -1,4 +1,7 @@
 {
+    "nombre": "Empresa B",
+    "fecha_creacion": "",
+    "fecha_finalizacion": "",
     "estado": "FINALIZADO",
     "saldo_inicial": "S/ 1500.00",
     "observaciones": "",
@@ -37,13 +40,6 @@
             "",
             "S/ 80.00",
             "S/ 4.00"
-        ],
-        [
-            "",
-            "",
-            "",
-            "",
-            ""
         ]
     ]
 }

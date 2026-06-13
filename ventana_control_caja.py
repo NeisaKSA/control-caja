@@ -414,6 +414,7 @@ class VentanaControlCaja(QMainWindow):
         
         if estado == "FINALIZADO" :
             self.mostrar_dialog_reporte()
+            self.fecha_finalizacion = datetime.now().strftime("%Y-%m-%d")
         elif estado == "ACTIVO":
             self.habilitar_edicion()
             
@@ -499,7 +500,7 @@ class VentanaControlCaja(QMainWindow):
         print("Cargando desde:", nombre_archivo)
         
         if len(datos["filas"]) == 0:
-            self.inicializar_empresa_nueva()
+            self.iniciar_empresa_nueva()
     
     def iniciar_empresa_nueva(self):
         self.colocar_saldo_inicial()
@@ -514,6 +515,8 @@ class VentanaControlCaja(QMainWindow):
         if dialogo.exec():
             observaciones = dialogo.obtener_observaciones()
             self.observaciones_finales = observaciones
+            self.fecha_finalizacion = datetime.now().strftime("%Y-%m-%d")
+            self.guardar_datos()
             self.generar_reporte()
             self.bloquear_edicion()
         else:

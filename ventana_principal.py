@@ -1,7 +1,7 @@
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTableView, QHeaderView, QPushButton, QTableWidget
+    QLabel, QTableView, QHeaderView, QPushButton, QTableWidget, QTableWidgetItem
 ) 
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt, QPropertyAnimation
@@ -158,21 +158,23 @@ class VentanaPrincipal(QMainWindow):
             )
 
         # Datos
-        datos = [
-            ("Empresa A", "2026-04-03", "Proceso"),
-            ("Empresa B", "2026-04-01", "Terminada"),
-        ]
+        # datos = [
+        #     ("Empresa A", "2026-04-03", "Proceso"),
+        #     ("Empresa B", "2026-04-01", "Terminada"),
+        # ]
+        
+        # for empresa, fecha, estado in self.cargar_empresas():
+        #     fila = []
 
-        for empresa, fecha, estado in datos:
-            fila = []
+        #     for valor in [empresa, fecha, estado]:
+        #         item = QStandardItem(valor)
+        #         item.setEditable(False)
+        #         fila.append(item)
 
-            for valor in [empresa, fecha, estado]:
-                item = QStandardItem(valor)
-                item.setEditable(False)
-                fila.append(item)
-
-            fila.append(QStandardItem())
-            self.model.appendRow(fila)
+        #     fila.append(QStandardItem())
+        #     self.model.appendRow(fila)
+        
+        self.cargar_empresas()
 
         # Tabla
         self.tabla_empresas = QTableView()
@@ -264,6 +266,8 @@ class VentanaPrincipal(QMainWindow):
             
             # crear archivo json
             self.crear_empresa(nombre, saldo)
+            # mostrar empresa creada
+            self.mostrar_empresas() 
             
             # Abrir control de caja
             self.ventana = VentanaControlCaja(nombre, saldo)
@@ -296,3 +300,41 @@ class VentanaPrincipal(QMainWindow):
         with open(nombre_archivo, "w", encoding="utf-8") as f:
             json.dump(datos, f, indent=4, ensure_ascii=False)
         print("Empresa creada:", nombre_archivo)
+        
+    def cargar_empresas(self):
+        carpeta = "datos"
+
+        if not os.path.exists(carpeta):
+            return
+
+        for archivo in os.listdir(carpeta):
+            if not archivo.endswith(".json"):
+                continue
+            
+            ruta = os.path.join(carpeta, archivo)
+            
+            with open(ruta, "r", encoding="utf-8") as f:
+                print("Leyendo:", archivo)
+                datos = json.load(f)
+                
+            datos.setdefault("nombre", archivo.replace(".json", ""))
+            datos.setdefault("fecha_creacion", "")
+            datos.setdefault("fecha_finalizacion", "")
+            datos.setdefault("estado", "ACTIVO")
+            
+            print("Archivo:", archivo)
+            print(datos)
+            
+            fila = [
+                QStandardItem(datos["nombre"]),
+                QStandardItem(datos["fecha_creacion"]),
+                QStandardItem(datos["estado"]),
+                QStandardItem()
+            ]
+
+            for item in fila[:-1]:
+                item.setEditable(False)
+
+            self.model.appendRow(fila)
+
+        

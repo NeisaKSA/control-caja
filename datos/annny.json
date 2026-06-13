@@ -1,38 +1,38 @@
 {
-    "nombre": "bunie",
+    "nombre": "annny",
     "fecha_creacion": "2026-06-11",
     "fecha_finalizacion": "",
-    "estado": "ACTIVO",
-    "saldo_inicial": "S/ 1500.00",
-    "observaciones": "",
+    "estado": "FINALIZADO",
+    "saldo_inicial": "S/ 123.00",
+    "observaciones": "proceso realizado conforme\n",
     "filas": [
         [
             "11/06/2026",
             "Saldo inicial en caja",
             "",
             "",
-            "S/ 1500.00"
+            "S/ 123.00"
         ],
         [
             "11/06/2026",
-            "sdfsdf",
+            "dfsgfd",
             "",
-            "S/ 150.00",
-            "S/ 1350.00"
+            "S/ 70.00",
+            "S/ 53.00"
         ],
         [
             "11/06/2026",
-            "sdfwe",
+            "hfyjygj",
+            "S/ 20.00",
             "",
-            "S/ 190.00",
-            "S/ 1160.00"
+            "S/ 73.00"
         ],
         [
             "11/06/2026",
-            "sdfdsfcsd",
+            "vnghj",
             "",
-            "S/ 1000.00",
-            "S/ 160.00"
+            "S/ 70.00",
+            "S/ 3.00"
         ]
     ]
 }
