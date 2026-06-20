@@ -119,14 +119,16 @@ class VentanaPrincipal(QMainWindow):
 
     def mostrar_proceso(self):
         self.label_contenido.setText("Vista: Proceso")
+        self.mostrar_empresas("ACTIVO")
 
     def mostrar_finalizado(self):
         self.label_contenido.setText("Vista: Finalizado")
+        self.mostrar_empresas("FINALIZADO")
 
     # =====================
     # VISTA EMPRESAS
     # =====================
-    def mostrar_empresas(self):
+    def mostrar_empresas(self, filtro_estado=None):
         # limpiar contenido anterior
         for i in reversed(range(self.contenido_layout.count())):
             widget_to_remove = self.contenido_layout.itemAt(i).widget()
@@ -156,25 +158,8 @@ class VentanaPrincipal(QMainWindow):
             self.model.setHeaderData(
                 col, Qt.Horizontal, font_bold, Qt.FontRole
             )
-
-        # Datos
-        # datos = [
-        #     ("Empresa A", "2026-04-03", "Proceso"),
-        #     ("Empresa B", "2026-04-01", "Terminada"),
-        # ]
         
-        # for empresa, fecha, estado in self.cargar_empresas():
-        #     fila = []
-
-        #     for valor in [empresa, fecha, estado]:
-        #         item = QStandardItem(valor)
-        #         item.setEditable(False)
-        #         fila.append(item)
-
-        #     fila.append(QStandardItem())
-        #     self.model.appendRow(fila)
-        
-        self.cargar_empresas()
+        self.cargar_empresas(filtro_estado)
 
         # Tabla
         self.tabla_empresas = QTableView()
@@ -303,7 +288,7 @@ class VentanaPrincipal(QMainWindow):
         print("Empresa creada:", nombre_archivo)
         return True
         
-    def cargar_empresas(self):
+    def cargar_empresas(self, filtro_estado=None):
         carpeta = "datos"
 
         if not os.path.exists(carpeta):
@@ -323,6 +308,9 @@ class VentanaPrincipal(QMainWindow):
             datos.setdefault("fecha_creacion", "")
             datos.setdefault("fecha_finalizacion", "")
             datos.setdefault("estado", "ACTIVO")
+            
+            if filtro_estado and datos["estado"] != filtro_estado:
+                continue
             
             print("Archivo:", archivo)
             print(datos)
