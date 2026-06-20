@@ -1,0 +1,17 @@
+{
+    "nombre": "lasla",
+    "fecha_creacion": "2026-06-16",
+    "fecha_finalizacion": "",
+    "estado": "ACTIVO",
+    "saldo_inicial": "S/ 120.00",
+    "observaciones": "",
+    "filas": [
+        [
+            "17/06/2026",
+            "Saldo inicial en caja",
+            "",
+            "",
+            "S/ 120.00"
+        ]
+    ]
+}

@@ -265,13 +265,14 @@ class VentanaPrincipal(QMainWindow):
                 saldo = "0.00"
             
             # crear archivo json
-            self.crear_empresa(nombre, saldo)
-            # mostrar empresa creada
-            self.mostrar_empresas() 
+            if self.crear_empresa(nombre, saldo):
+                # mostrar empresa creada
+                self.actualizar_tabla_empresas()
+                # Abrir control de caja
+                self.ventana = VentanaControlCaja(nombre, saldo)
+                self.ventana.show()
             
-            # Abrir control de caja
-            self.ventana = VentanaControlCaja(nombre, saldo)
-            self.ventana.show()
+            self.tabla_empresas.viewport().update()
             
             print("Empresa:", nombre)
             print("Saldo:", saldo)
@@ -295,11 +296,12 @@ class VentanaPrincipal(QMainWindow):
         
         if os.path.exists(nombre_archivo):
             print("La empresa ya existe")
-            return
+            return False
         
         with open(nombre_archivo, "w", encoding="utf-8") as f:
             json.dump(datos, f, indent=4, ensure_ascii=False)
         print("Empresa creada:", nombre_archivo)
+        return True
         
     def cargar_empresas(self):
         carpeta = "datos"
@@ -337,4 +339,8 @@ class VentanaPrincipal(QMainWindow):
 
             self.model.appendRow(fila)
 
-        
+    def actualizar_tabla_empresas(self):
+        self.model.removeRows(0, self.model.rowCount())
+        print("Antes:", self.model.rowCount())
+        self.cargar_empresas()  
+        print("Después:", self.model.rowCount())

@@ -1,0 +1,24 @@
+{
+    "nombre": "wakiwaki",
+    "fecha_creacion": "2026-06-19",
+    "fecha_finalizacion": "",
+    "estado": "ACTIVO",
+    "saldo_inicial": "S/ 150.00",
+    "observaciones": "",
+    "filas": [
+        [
+            "19/06/2026",
+            "Saldo inicial en caja",
+            "",
+            "",
+            "S/ 150.00"
+        ],
+        [
+            "19/06/2026",
+            "fvfrferfr",
+            "",
+            "S/ 100.00",
+            "S/ 50.00"
+        ]
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "nombre": "lulu",
+    "fecha_creacion": "2026-06-13",
+    "fecha_finalizacion": "",
+    "estado": "ACTIVO",
+    "saldo_inicial": "S/ 150.00",
+    "observaciones": "",
+    "filas": [
+        [
+            "13/06/2026",
+            "Saldo inicial en caja",
+            "",
+            "",
+            "S/ 150.00"
+        ]
+    ]
+}
