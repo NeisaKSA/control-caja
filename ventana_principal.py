@@ -1,7 +1,7 @@
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTableView, QHeaderView, QPushButton, QTableWidget, QTableWidgetItem
+    QLabel, QTableView, QHeaderView, QPushButton, QTableWidget, QLineEdit
 ) 
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
 from PySide6.QtCore import Qt, QPropertyAnimation
@@ -144,6 +144,13 @@ class VentanaPrincipal(QMainWindow):
         btn_agregar = QPushButton("+ Nueva Empresa")
         btn_agregar.clicked.connect(self.abrir_dialog_empresa)
         self.contenido_layout.addWidget(btn_agregar)
+        
+        # boton de busqieda
+        self.txt_busqueda = QLineEdit()
+        self.txt_busqueda.setPlaceholderText("Buscar empresa...")
+        self.txt_busqueda.textChanged.connect(self.buscar_empresa)
+        self.contenido_layout.addWidget(self.txt_busqueda)
+        self.contenido_layout.addSpacing(15)
 
         # Modelo
         self.model = QStandardItemModel()
@@ -332,3 +339,13 @@ class VentanaPrincipal(QMainWindow):
         print("Antes:", self.model.rowCount())
         self.cargar_empresas()  
         print("Después:", self.model.rowCount())
+        
+    def buscar_empresa(self, texto = ""):
+        texto = texto.lower()
+        
+        for fila in range(self.model.rowCount()):
+            nombre = self.model.item(fila, 0).text().lower()
+            
+            ocultar = texto not in nombre
+            
+            self.tabla_empresas.setRowHidden(fila, ocultar)
